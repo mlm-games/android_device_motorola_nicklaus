@@ -41,6 +41,7 @@ BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
 TARGET_USES_MKE2FS := true # Use MKE2FS for creating ext4 images
 
 # Kernel
+#TARGET_PREBUILT_KERNEL := device/motorola/nicklaus/prebuilt/zImage-dtb
 BOARD_KERNEL_IMAGE_NAME := zImage-dtb
 TARGET_KERNEL_SOURCE := kernel/motorola/nicklaus
 TARGET_KERNEL_CONFIG := nicklaus_defconfig
@@ -78,3 +79,17 @@ BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
 # System Properties
 TARGET_SYSTEM_PROP := $(DEVICE_PATH)/system.prop
 
+# ART/Dex2oat configuration
+TARGET_CPU_VARIANT_RUNTIME := cortex-a53
+TARGET_ARCH_VARIANT_CPU := cortex-a53
+TARGET_CPU_ABI := armeabi-v7a
+TARGET_CPU_ABI2 := armeabi
+
+# Memory configuration
+BOARD_KERNEL_CMDLINE += androidboot.vm.heapsize=512m
+
+# Dex pre-optimization
+WITH_DEXPREOPT := false
+WITH_DEXPREOPT_BOOT_IMG_ONLY := false
+WITH_DEXPREOPT_PIC := false
+DONT_DEXPREOPT_PREBUILTS := true
