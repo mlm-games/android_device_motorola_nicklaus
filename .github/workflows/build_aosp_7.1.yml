@@ -49,14 +49,7 @@ jobs:
               cd ~/workdir
               repo init --depth=1 -u https://github.com/LineageOS/android.git -b cm-14.1
               # Sync sources with minimal options
-              repo sync \
-                --current-branch \
-                --no-tags \
-                --no-clone-bundle \
-                --optimized-fetch \
-                --prune \
-                --force-sync \
-                -j$(nproc) \
+              repo sync  repo sync -c -q --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune -j$(nproc)
               # Clone device trees with minimal depth
               git clone --depth=1 https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus
               git clone --depth=1 https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/mt6737-common
