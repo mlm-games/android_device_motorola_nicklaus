@@ -57,7 +57,6 @@ jobs:
                 --prune \
                 --force-sync \
                 -j$(nproc) \
-                --depth=1
               # Clone device trees with minimal depth
               git clone --depth=1 https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus
               git clone --depth=1 https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/mt6737-common
