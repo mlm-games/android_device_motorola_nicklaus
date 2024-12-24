@@ -14,11 +14,6 @@ jobs:
     steps:
       - name: Cleanup
         uses: rokibhasansagar/slimhub_actions@main
-
-      - name: Swap Space
-        uses: pierotofy/set-swap-space@master
-        with:
-          swap-size-gb: 12
         
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -43,21 +38,29 @@ jobs:
               chmod a+x ~/bin/repo
               export PATH=\$PATH:~/bin
 
-              # Initialize Repo
+              # Initialize Repo with minimal depth
               mkdir ~/workdir
               cd ~/workdir
-              repo init -u https://github.com/LineageOS/android.git -b cm-14.1
+              repo init --depth=1 -u https://github.com/LineageOS/android.git -b cm-14.1
 
-              # Sync sources
-              repo sync -c -q -j8 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
+              # Sync sources with minimal options
+              repo sync \
+                --current-branch \
+                --no-tags \
+                --no-clone-bundle \
+                --optimized-fetch \
+                --prune \
+                --force-sync \
+                -j$(nproc) \
+                --depth=1
 
-              # Clone necessary trees
-              git clone https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus
-              git clone https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/mt6737-common
-              git clone https://github.com/LineageOS-MediaTek/proprietary_vendor_motorola -b cm-14.1 vendor/motorola
-              git clone https://github.com/Klozz/android_kernel_motorola_nicklaus kernel/motorola/nicklaus
+              # Clone device trees with minimal depth
+              git clone --depth=1 https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus
+              git clone --depth=1 https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/mt6737-common
+              git clone --depth=1 https://github.com/LineageOS-MediaTek/proprietary_vendor_motorola -b cm-14.1 vendor/motorola
+              git clone --depth=1 https://github.com/Klozz/android_kernel_motorola_nicklaus kernel/motorola/nicklaus
 
-              # Set build flags
+              # Set build flags for optimization
               export USE_DEX2OAT_DEBUG=false
               export WITH_DEXPREOPT=false
               export WITH_DEXPREOPT_BOOT_IMG_ONLY=false
@@ -65,12 +68,10 @@ jobs:
               export PRODUCT_MINIMIZE_JAVA_DEBUG_INFO=true
               export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true
 
-              # Configure ccache
-              export CCACHE_DIR=/github/workspace/.ccache
-              export USE_CCACHE=1
-              export CCACHE_COMPRESS=1
-              mkdir -p /github/workspace/.ccache
-              prebuilts/misc/linux-x86/ccache/ccache -M 50G
+              # Additional memory optimizations
+              export JACK_SERVER_VM_ARGUMENTS='-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx4g'
+              export ANDROID_JACK_VM_ARGS='-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx4g'
+              export _JAVA_OPTIONS='-Xmx4g'
 
               # Start building
               source build/envsetup.sh
