@@ -10,68 +10,72 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    permissions:
-      contents: write
+
     steps:
-      - name: Clean ubuntu
+      - name: Cleanup
         uses: rokibhasansagar/slimhub_actions@main
 
       - name: Swap Space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 12
-          
+        
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo docker pull mlmgames/aosp_7.1
+
       - name: Run build in Docker container
-        uses: docker://mlmgames/aosp_7.1
-        with:
-          entrypoint: /bin/bash
-          args: |
-            -c "
-            # Install repo
-            mkdir -p ~/bin
-            curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-            chmod a+x ~/bin/repo
-            export PATH=\$PATH:~/bin
+        run: |
+          sudo docker run --rm \
+            -v ${{ github.workspace }}:/github/workspace \
+            -w /github/workspace \
+            mlmgames/aosp_7.1 \
+            /bin/bash -c "
+              # Install repo
+              mkdir -p ~/bin
+              curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+              chmod a+x ~/bin/repo
+              export PATH=\$PATH:~/bin
 
-            # Initialize Repo
-            mkdir ~/workdir
-            cd ~/workdir
-            repo init -u https://github.com/LineageOS/android.git -b cm-14.1
+              # Initialize Repo
+              mkdir ~/workdir
+              cd ~/workdir
+              repo init -u https://github.com/LineageOS/android.git -b cm-14.1
 
-            # Sync sources
-            repo sync -c -q -j8 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
+              # Sync sources
+              repo sync -c -q -j8 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 
-            # Clone necessary trees
-            git clone https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus
-            git clone https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/mt6737-common
-            git clone https://github.com/LineageOS-MediaTek/proprietary_vendor_motorola -b cm-14.1 vendor/motorola
-            git clone https://github.com/Klozz/android_kernel_motorola_nicklaus kernel/motorola/nicklaus
+              # Clone necessary trees
+              git clone https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus
+              git clone https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/mt6737-common
+              git clone https://github.com/LineageOS-MediaTek/proprietary_vendor_motorola -b cm-14.1 vendor/motorola
+              git clone https://github.com/Klozz/android_kernel_motorola_nicklaus kernel/motorola/nicklaus
 
-            # Set build flags
-            export USE_DEX2OAT_DEBUG=false
-            export WITH_DEXPREOPT=false
-            export WITH_DEXPREOPT_BOOT_IMG_ONLY=false
-            export DISABLE_DEXPREOPT=true
-            export PRODUCT_MINIMIZE_JAVA_DEBUG_INFO=true
-            export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true
+              # Set build flags
+              export USE_DEX2OAT_DEBUG=false
+              export WITH_DEXPREOPT=false
+              export WITH_DEXPREOPT_BOOT_IMG_ONLY=false
+              export DISABLE_DEXPREOPT=true
+              export PRODUCT_MINIMIZE_JAVA_DEBUG_INFO=true
+              export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true
 
-            # Configure ccache
-            export CCACHE_DIR=/github/workspace/.ccache
-            export USE_CCACHE=1
-            export CCACHE_COMPRESS=1
-            mkdir -p /github/workspace/.ccache
-            prebuilts/misc/linux-x86/ccache/ccache -M 50G
+              # Configure ccache
+              export CCACHE_DIR=/github/workspace/.ccache
+              export USE_CCACHE=1
+              export CCACHE_COMPRESS=1
+              mkdir -p /github/workspace/.ccache
+              prebuilts/misc/linux-x86/ccache/ccache -M 50G
 
-            # Clean build
-            make clean && make clobber
-
-            # Start building
-            source build/envsetup.sh
-            breakfast nicklaus
-            make -j$(nproc) bacon | tee build.log
+              # Start building
+              source build/envsetup.sh
+              breakfast nicklaus
+              make -j$(nproc) bacon | tee build.log
             "
 
       - name: Upload build artifacts
