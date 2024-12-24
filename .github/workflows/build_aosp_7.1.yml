@@ -1,0 +1,81 @@
+name: Build Motorola Nicklaus ROM
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: mlmgames/aosp_7.1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install repo
+        run: |
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          export PATH=${PATH}:~/bin
+
+      - name: Initialize Repo
+        run: |
+          mkdir ~/workdir
+          cd ~/workdir
+          repo init -u https://github.com/LineageOS/android.git -b cm-14.1
+
+      - name: Sync sources
+        run: |
+          cd ~/workdir
+          repo sync -c -q -j8 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
+
+      - name: Clone necessary trees
+        run: |
+          cd ~/workdir
+          git clone https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus
+          git clone https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/mt6737-common
+          git clone https://github.com/LineageOS-MediaTek/proprietary_vendor_motorola -b cm-14.1 vendor/motorola
+          git clone https://github.com/Klozz/android_kernel_motorola_nicklaus kernel/motorola/nicklaus
+
+      - name: Set flags for disabling dexpreopt
+        run: |
+          echo "export USE_DEX2OAT_DEBUG=false" >> ~/.bashrc
+          echo "export WITH_DEXPREOPT=false" >> ~/.bashrc
+          echo "export WITH_DEXPREOPT_BOOT_IMG_ONLY=false" >> ~/.bashrc
+          echo "export DISABLE_DEXPREOPT=true" >> ~/.bashrc
+          echo "export PRODUCT_MINIMIZE_JAVA_DEBUG_INFO=true" >> ~/.bashrc
+          echo "export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true" >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Enable ccache
+        run: |
+          echo "export CCACHE_DIR=\$GITHUB_WORKSPACE/.ccache" >> ~/.bashrc
+          echo "export USE_CCACHE=1" >> ~/.bashrc
+          echo "export CCACHE_COMPRESS=1" >> ~/.bashrc
+          source ~/.bashrc
+          mkdir -p $GITHUB_WORKSPACE/.ccache
+          prebuilts/misc/linux-x86/ccache/ccache -M 50G
+
+      - name: Clean build
+        run: |
+          cd ~/workdir
+          make clean && make clobber
+
+      - name: Start building
+        run: |
+          cd ~/workdir
+          . build/envsetup.sh
+          breakfast nicklaus
+          make -j$(nproc) bacon | tee build.log
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: nicklaus-build
+          path: ~/workdir/out/target/product/nicklaus/*
