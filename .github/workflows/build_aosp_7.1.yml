@@ -13,7 +13,9 @@ jobs:
 
     steps:
       - name: Clean runner environment
-
+        run: |
+          sudo rm -rf /*
+          
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -21,8 +23,9 @@ jobs:
         uses: docker://mlmgames/aosp_7.1
         with:
           entrypoint: /bin/bash
-          args: -c "
-            # Install repo (if not already in the Docker image)
+          args: |
+            -c "
+            # Install repo
             mkdir -p ~/bin
             curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
             chmod a+x ~/bin/repo
@@ -42,35 +45,36 @@ jobs:
             git clone https://github.com/LineageOS-MediaTek/proprietary_vendor_motorola -b cm-14.1 vendor/motorola
             git clone https://github.com/Klozz/android_kernel_motorola_nicklaus kernel/motorola/nicklaus
 
-            # Set flags for disabling dexpreopt
-            echo 'export USE_DEX2OAT_DEBUG=false' >> ~/.bashrc
-            echo 'export WITH_DEXPREOPT=false' >> ~/.bashrc
-            echo 'export WITH_DEXPREOPT_BOOT_IMG_ONLY=false' >> ~/.bashrc
-            echo 'export DISABLE_DEXPREOPT=true' >> ~/.bashrc
-            echo 'export PRODUCT_MINIMIZE_JAVA_DEBUG_INFO=true' >> ~/.bashrc
-            echo 'export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true' >> ~/.bashrc
-            source ~/.bashrc
+            # Set build flags
+            export USE_DEX2OAT_DEBUG=false
+            export WITH_DEXPREOPT=false
+            export WITH_DEXPREOPT_BOOT_IMG_ONLY=false
+            export DISABLE_DEXPREOPT=true
+            export PRODUCT_MINIMIZE_JAVA_DEBUG_INFO=true
+            export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true
 
-            # Enable ccache
-            echo 'export CCACHE_DIR=\$GITHUB_WORKSPACE/.ccache' >> ~/.bashrc
-            echo 'export USE_CCACHE=1' >> ~/.bashrc
-            echo 'export CCACHE_COMPRESS=1' >> ~/.bashrc
-            source ~/.bashrc
-            mkdir -p $GITHUB_WORKSPACE/.ccache
+            # Configure ccache
+            export CCACHE_DIR=/github/workspace/.ccache
+            export USE_CCACHE=1
+            export CCACHE_COMPRESS=1
+            mkdir -p /github/workspace/.ccache
             prebuilts/misc/linux-x86/ccache/ccache -M 50G
 
             # Clean build
             make clean && make clobber
 
             # Start building
-            . build/envsetup.sh
+            source build/envsetup.sh
             breakfast nicklaus
             make -j$(nproc) bacon | tee build.log
-          "
+            "
 
       - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: nicklaus-build
-          path: ~/workdir/out/target/product/nicklaus/*
+          path: |
+            ~/workdir/out/target/product/nicklaus/*.zip
+            ~/workdir/out/target/product/nicklaus/*.md5sum
+            build.log
