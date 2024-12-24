@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      # - name: Cleanup
-      #   uses: rokibhasansagar/slimhub_actions@main
+      - name: Cleanup
+        uses: rokibhasansagar/slimhub_actions@main
 
-      # - name: Swap Space
-      #   uses: pierotofy/set-swap-space@master
-      #   with:
-      #     swap-size-gb: 12
+      - name: Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 12
         
       - name: Checkout repository
         uses: actions/checkout@v4
