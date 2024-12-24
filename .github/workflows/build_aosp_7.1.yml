@@ -68,6 +68,12 @@ jobs:
               breakfast nicklaus
               make -j$(nproc) bacon | tee build.log
             "
+            
+      - name: Print space left
+        run: |
+          echo "::group::<{[<]}> Raw Disk Space Before Cleanup <{[>]}>"
+          df --sync -BM --output=pcent,used,avail /
+          echo "::endgroup::"
       
       - name: Upload build artifacts
         if: always()
