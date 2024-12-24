@@ -14,6 +14,11 @@ jobs:
     steps:
       - name: Cleanup
         uses: rokibhasansagar/slimhub_actions@main
+
+      - name: Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 12
         
       - name: Checkout repository
         uses: actions/checkout@v3
