@@ -10,11 +10,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-
+    permissions:
+      contents: write
     steps:
-      - name: Clean runner environment
-        run: |
-          sudo rm -rf /*
+      - name: Clean ubuntu
+        uses: rokibhasansagar/slimhub_actions@main
+
+      - name: Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 12
           
       - name: Checkout repository
         uses: actions/checkout@v3
