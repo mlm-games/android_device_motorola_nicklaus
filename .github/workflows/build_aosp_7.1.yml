@@ -38,6 +38,8 @@ jobs:
             mlmgames/aosp_7.1 \
             /bin/bash -c "
               # Install repo
+              ls
+              pwd
               mkdir -p ~/bin
               curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
               chmod a+x ~/bin/repo
