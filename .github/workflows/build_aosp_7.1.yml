@@ -15,10 +15,10 @@ jobs:
       - name: Cleanup
         uses: rokibhasansagar/slimhub_actions@main
 
-      - name: Swap Space
-        uses: pierotofy/set-swap-space@master
-        with:
-          swap-size-gb: 12
+      # - name: Swap Space
+      #   uses: pierotofy/set-swap-space@master
+      #   with:
+      #     swap-size-gb: 12
         
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -71,7 +71,7 @@ jobs:
             
       - name: Print space left
         run: |
-          echo "::group::<{[<]}> Raw Disk Space Before Cleanup <{[>]}>"
+          echo "::group::<{[<]}> Raw Disk Space After Building <{[>]}>"
           df --sync -BM --output=pcent,used,avail /
           echo "::endgroup::"
       
