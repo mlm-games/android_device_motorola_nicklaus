@@ -19,7 +19,13 @@ jobs:
       #   uses: pierotofy/set-swap-space@master
       #   with:
       #     swap-size-gb: 12
-        
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: android-7.1-build
+          max-size: 15G
+      
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -34,12 +40,16 @@ jobs:
         run: |
           sudo docker run --rm \
             -v ${{ github.workspace }}:/github/workspace \
+            -v ~/.ccache:/root/.ccache \
             -w /github/workspace \
             mlmgames/aosp_7.1 \
             /bin/bash -c "
-              # Install repo
-              ls
-              pwd
+              export USE_CCACHE=1
+              export CCACHE_EXEC=/usr/bin/ccache
+              export CCACHE_DIR=/root/.ccache
+              # Install repo after cleaning checkout
+              rm *
+              rm -rf *
               mkdir -p ~/bin
               curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
               chmod a+x ~/bin/repo
