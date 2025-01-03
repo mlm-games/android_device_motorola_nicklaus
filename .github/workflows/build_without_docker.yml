@@ -106,8 +106,9 @@ jobs:
           #export CCACHE_EXEC=/usr/bin/ccache
           #export CCACHE_DIR=/root/.ccache
           # Install repo after cleaning checkout
-          sudo rm *
-          sudo rm -rf *
+          ls -l
+          sudo rm ./*
+          sudo rm -rf ./*
           mkdir -p ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
