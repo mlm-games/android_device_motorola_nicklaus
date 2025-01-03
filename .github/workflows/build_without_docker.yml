@@ -22,8 +22,8 @@ jobs:
       #     key: android-7.1-build
       #     max-size: 15G
       
-      # - name: Checkout repository
-      #   uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
 
       - name: Set up environment variables
@@ -107,12 +107,12 @@ jobs:
           #export CCACHE_DIR=/root/.ccache
           # Install repo after cleaning checkout
           ls -l
-          # sudo rm ./*
-          # sudo rm -rf ./*
+          sudo rm ./*
+          sudo rm -rf ./*
           mkdir -p ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
-          export PATH=\$PATH:~/bin
+          export PATH=$PATH:~/bin
           # Initialize Repo with minimal depth
           mkdir ~/workdir
           cd ~/workdir
