@@ -38,7 +38,6 @@ jobs:
 
       - name: Install deps
         run: |
-          sudo apt-get update && sudo apt-get install -y locales && locale-gen en_US.UTF-8
           echo "Installing dependencies"
           sudo apt-get update && sudo apt-get install -y \
             git-core \
@@ -80,7 +79,9 @@ jobs:
             lsof \
             python3 \
             python3-pip \
-            locales
+            locales \
+            locale-gen \
+            en_US.UTF-8
 
       - name: Modify java.security file
         run: |
