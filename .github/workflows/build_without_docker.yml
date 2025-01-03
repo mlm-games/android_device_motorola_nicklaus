@@ -64,7 +64,6 @@ jobs:
             xsltproc \
             unzip \
             python \
-            python-pip \
             wget \
             openjdk-8-jdk \
             android-tools-adb \
