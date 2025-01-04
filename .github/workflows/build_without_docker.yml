@@ -136,8 +136,10 @@ jobs:
           export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true
           # Start building
           cd ~/workdir  # Make sure we're in the correct directory
+          set -e
           source build/envsetup.sh
           breakfast nicklaus
+          set +e
           make -j$(nproc) bacon | tee build.log
             
       - name: Print space left
