@@ -19,10 +19,17 @@ repo sync -c -q -j8 --force-sync --no-clone-bundle --no-tags --optimized-fetch -
 ``` 
 #### Clone necessary trees
 ```
+
 git clone https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus
 git clone https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/common
 git clone https://github.com/LineageOS-MediaTek/proprietary_vendor_motorola -b cm-14.1 vendor/motorola
 git clone https://github.com/Klozz/android_kernel_motorola_nicklaus kernel/motorola/nicklaus
+
+git clone https://github.com/mlm-games/android_device_motorola_nicklaus -b cm-14.1 device/motorola/nicklaus --depth=1
+git clone https://github.com/LineageOS-MediaTek/android_device_mediatek_mt6737-common -b cm-14.1 device/mediatek/common --depth=1
+git clone https://github.com/LineageOS-MediaTek/proprietary_vendor_motorola -b cm-14.1 vendor/motorola --depth=1
+git clone https://github.com/Klozz/android_kernel_motorola_nicklaus kernel/motorola/nicklaus --depth=1
+
 ```
 ## Building Source
 
